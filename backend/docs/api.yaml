@@ -1,0 +1,346 @@
+openapi: 3.0.3
+info:
+  title: EventMax API
+  description: |
+    EventMax Backend API for event booking and management system.
+    
+    Features:
+    - Event management with dynamic pricing
+    - Real-time seat reservation system
+    - JWT-based authentication
+    - Invoice generation
+    - WebSocket notifications
+    
+  version: 1.0.0
+  contact:
+    name: EventMax API Support
+    
+servers:
+  - url: http://localhost:4000
+    description: Development server
+  - url: https://api.eventmax.com
+    description: Production server
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  db:
+                    type: string
+                    example: "ok"
+                  redis:
+                    type: string
+                    example: "ok"
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /events:
+    get:
+      summary: List all events
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, ended, upcoming]
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Event'
+                  total:
+                    type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+
+    post:
+      summary: Create new event
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        '201':
+          description: Event created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /events/{eventId}:
+    get:
+      summary: Get event details
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Event details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDetails'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /bookings/attempt:
+    post:
+      summary: Attempt seat reservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - eventId
+                - seatLabel
+              properties:
+                eventId:
+                  type: string
+                  format: uuid
+                seatLabel:
+                  type: string
+                  example: "A1"
+      responses:
+        '201':
+          description: Seat reserved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reservationToken:
+                    type: string
+                    format: uuid
+                  expiresAt:
+                    type: string
+                    format: date-time
+                  seatLabel:
+                    type: string
+                  price:
+                    type: number
+        '409':
+          description: Seat already reserved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /bookings/confirm:
+    post:
+      summary: Confirm booking with reservation token
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - eventId
+                - seatLabel
+                - reservationToken
+              properties:
+                eventId:
+                  type: string
+                  format: uuid
+                seatLabel:
+                  type: string
+                  example: "A1"
+                reservationToken:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Booking confirmed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bookingId:
+                    type: string
+                    format: uuid
+                  invoiceUrl:
+                    type: string
+                    format: uri
+                  totalAmount:
+                    type: number
+        '400':
+          description: Invalid or expired reservation token
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Seat no longer available
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        venue:
+          type: string
+        eventDate:
+          type: string
+          format: date-time
+        basePrice:
+          type: number
+        totalSeats:
+          type: integer
+        availableSeats:
+          type: integer
+        status:
+          type: string
+          enum: [active, ended, upcoming]
+        createdAt:
+          type: string
+          format: date-time
+
+    EventDetails:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+          properties:
+            seats:
+              type: array
+              items:
+                $ref: '#/components/schemas/Seat'
+            pricingRules:
+              type: object
+
+    Seat:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        seatLabel:
+          type: string
+        row:
+          type: string
+        number:
+          type: integer
+        status:
+          type: string
+          enum: [available, reserved, booked]
+        price:
+          type: number
+
+    CreateEventRequest:
+      type: object
+      required:
+        - title
+        - venue
+        - eventDate
+        - basePrice
+        - seatLayout
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        venue:
+          type: string
+        eventDate:
+          type: string
+          format: date-time
+        basePrice:
+          type: number
+        seatLayout:
+          type: object
+          description: Seat layout configuration
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            code:
+              type: string
+            details:
+              type: object
+
+  responses:
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

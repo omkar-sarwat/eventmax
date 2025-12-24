@@ -1,0 +1,8 @@
+﻿#
+# File: .prettierrc
+# Responsibility: Code formatting defaults for the repo.
+# Future: Adjust rules as codebase grows.
+#
+printWidth: 100
+singleQuote: true
+trailingComma:  all

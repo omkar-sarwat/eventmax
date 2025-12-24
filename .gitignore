@@ -1,0 +1,220 @@
+﻿# =====================================================
+# EventMax .gitignore
+# =====================================================
+
+# =====================================================
+# Dependencies
+# =====================================================
+node_modules/
+*/node_modules/
+.pnp
+.pnp.js
+
+# =====================================================
+# Environment & Secrets (CRITICAL - NEVER COMMIT)
+# =====================================================
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+.env.docker
+*.env
+
+# JWT Secrets
+jwt-secret.txt
+secrets/
+*.key
+*.pem
+*.crt
+
+# =====================================================
+# Build Outputs
+# =====================================================
+dist/
+build/
+out/
+.next/
+.nuxt/
+*.tgz
+
+# Frontend build
+frontend/dist/
+frontend/build/
+
+# Backend build
+backend/dist/
+backend/build/
+
+# =====================================================
+# Test Files & Reports
+# =====================================================
+# Test scripts (root level)
+test-*.js
+check-*.js
+debug-*.js
+verify-*.js
+quick-*.js
+simple-*.js
+browser-*.js
+detailed-*.js
+
+# Test directories
+tests/coverage/
+tests/reports/
+testsprite_tests/
+coverage/
+.nyc_output/
+
+# Test reports
+*.test-report.json
+api-test-report.json
+test-report.html
+junit.xml
+
+# K6 test outputs (keep test scripts, ignore results)
+tests/k6/results/
+*.k6.json
+
+# =====================================================
+# Debug & Fix Scripts
+# =====================================================
+fix-*.js
+fix-*.ps1
+run-*.ps1
+start-*.ps1
+stop-*.ps1
+update-*.js
+update-*.ps1
+create-*.js
+make-*.js
+generate-*.js
+
+# =====================================================
+# Database & SQL
+# =====================================================
+*.sql
+!backend/src/database/schema.sql
+!backend/src/database/migrations/*.sql
+*.dump
+*.backup
+invoices/
+
+# =====================================================
+# Logs
+# =====================================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# =====================================================
+# IDE & Editor
+# =====================================================
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# =====================================================
+# OS Generated
+# =====================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# =====================================================
+# Docker (keep compose files)
+# =====================================================
+docker/data/
+docker/volumes/
+*.tar
+docker-compose.override.yml
+
+# =====================================================
+# Temporary Files
+# =====================================================
+tmp/
+temp/
+*.tmp
+*.temp
+*.cache
+.cache/
+
+# =====================================================
+# Panda CSS (if used)
+# =====================================================
+styled-system/
+styled-system-studio/
+
+# =====================================================
+# Miscellaneous
+# =====================================================
+*.bak
+*.orig
+*.pid
+*.seed
+*.pid.lock
+
+# Uploaded files
+uploads/
+public/uploads/
+
+# Generated files
+*.generated.*
+
+# =====================================================
+# Documentation Build (keep source)
+# =====================================================
+docs/_build/
+docs/.docusaurus/
+site/
+
+# =====================================================
+# Sensitive Documentation
+# =====================================================
+*FIX_GUIDE.md
+*_FIX_*.md
+*CORRECTIONS*.md
+*_SUMMARY.md
+!docs/SYSTEM_ARCHITECTURE_DESIGN.md
+
+# =====================================================
+# Qodo & AI Generated
+# =====================================================
+.qodo/
+
+# =====================================================
+# GitHub (keep workflows)
+# =====================================================
+!.github/
+!.github/workflows/
+
+# =====================================================
+# Keep these files
+# =====================================================
+!.gitkeep
+!README.md
+!LICENSE
+!CONTRIBUTING.md
+!docker-compose.yml
+!docker-compose.dev.yml
+!Dockerfile

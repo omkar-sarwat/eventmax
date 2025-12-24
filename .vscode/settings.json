@@ -1,0 +1,17 @@
+{
+  "tailwindCSS.experimental.configFile": "frontend/tailwind.config.js",
+  "tailwindCSS.lint.invalidTailwindDirective": "ignore",
+  "tailwindCSS.lint.unknownAtRules": "ignore",
+  "css.lint.unknownAtRules": "ignore",
+  "css.validate": false,
+  "less.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "css.customData": [".vscode/css_custom_data.json"],
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  },
+  "codium.codeCompletion.enable": true
+}

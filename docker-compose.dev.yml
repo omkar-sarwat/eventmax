@@ -1,0 +1,96 @@
+version: '3.8'
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EVENTMAX LOCAL DEVELOPMENT - DOCKER COMPOSE
+# ═══════════════════════════════════════════════════════════════════════════
+# Based on System Architecture Design Document
+# Optimized for LOCAL development - FREE, no cloud needed!
+# ═══════════════════════════════════════════════════════════════════════════
+
+services:
+  # ─────────────────────────────────────────────────────────────────────────
+  # POSTGRESQL DATABASE
+  # Architecture Doc Reference: Section 6.1 - Database Architecture
+  # ─────────────────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: eventmax_postgres_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: eventmax
+      # Performance tuning for development
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./backend/sql:/docker-entrypoint-initdb.d:ro
+    # Optimized PostgreSQL settings from Architecture Document
+    command: >
+      postgres
+      -c max_connections=100
+      -c shared_buffers=128MB
+      -c effective_cache_size=256MB
+      -c maintenance_work_mem=32MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=8MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c log_statement=all
+      -c log_duration=on
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d eventmax"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - eventmax-dev-network
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # REDIS CACHE & SESSION STORE
+  # Architecture Doc Reference: Section 5.2 - Redis Cluster Configuration
+  # ─────────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: eventmax_redis_dev
+    restart: unless-stopped
+    # Redis configuration from Architecture Document
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+      --tcp-keepalive 300
+      --timeout 0
+      --loglevel notice
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - eventmax-dev-network
+
+volumes:
+  postgres_dev_data:
+    driver: local
+  redis_dev_data:
+    driver: local
+
+networks:
+  eventmax-dev-network:
+    driver: bridge
+

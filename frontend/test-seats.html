@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Seats API</title>
+</head>
+<body>
+    <h1>Test Seats API</h1>
+    <button onclick="testSeatsAPI()">Test Rock Concert Seats</button>
+    <button onclick="testJazzSeats()">Test Jazz Festival Seats</button>
+    <div id="result"></div>
+
+    <script>
+        async function testSeatsAPI() {
+            try {
+                const response = await fetch('http://localhost:4000/api/v1/events/cda3bd15-a1b6-4b45-b16e-511b0dc2138b/seats');
+                const data = await response.json();
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+
+        async function testJazzSeats() {
+            try {
+                const response = await fetch('http://localhost:4000/api/v1/events/ff0f7525-163a-40eb-a876-0a28b4384646/seats');
+                const data = await response.json();
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
