@@ -99,6 +99,7 @@ generate-*.js
 *.sql
 !backend/src/database/schema.sql
 !backend/src/database/migrations/*.sql
+!backend/sql/seed.sql
 *.dump
 *.backup
 invoices/
